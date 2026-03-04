@@ -9,6 +9,7 @@ use Yajra\DataTables\Facades\DataTables;
 class UserController extends Controller
 {
     // Menampilkan halaman awal user
+    // Menampilkan halaman awal user
     public function index()
     {
         $breadcrumb = (object) [
@@ -20,15 +21,23 @@ class UserController extends Controller
             'title' => 'Daftar user yang terdaftar dalam sistem'
         ];
 
-        $activeMenu = 'user'; 
+        $activeMenu = 'user'; // set menu yang sedang aktif
+        
+        $level = LevelModel::all(); // ambil data level untuk filter level
 
-        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
+        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
     }
+    // Ambil data user dalam bentuk json untuk datatables
     // Ambil data user dalam bentuk json untuk datatables
     public function list(Request $request)
     {
         $users = UserModel::select('user_id', 'username', 'nama', 'level_id')
                     ->with('level');
+
+        // Filter data user berdasarkan level_id
+        if ($request->level_id) {
+            $users->where('level_id', $request->level_id);
+        }
 
         return DataTables::of($users)
             // menambahkan kolom index / no urut (default nama kolom: DT_RowIndex)
